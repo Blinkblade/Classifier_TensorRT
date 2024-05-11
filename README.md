@@ -33,6 +33,7 @@ cd Classifier_TensorRT
 python scripts/export_onnx.py 
 ```
 #### 使用CMAKE编译/Compile with cmake
+首先需要将CMakeLists.txt中的tensorrt路径TENSORRT_INSTALL_DIR改为你的安装路径,不同的安装模式有不同写法,这点在CMakeLists.txt已经注明
 ```bash
 cd build
 cmake ..
@@ -52,6 +53,7 @@ cd ..
 - 所有功能封装到工厂类中,只需指定图像即可实现一键推理
 - python,c++,cuda多语言
 - 使用cmake实现直观高效的c++/cuda混合编译,再也不用为找不到路径/看不懂Makefile发愁了!
+- note中记录了一些笔记,是构建项目时遇到的一些问题,如果有和我一样的小白可以看看避一些坑
 
 
 ## Acknowledgements
