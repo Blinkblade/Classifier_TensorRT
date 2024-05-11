@@ -7,8 +7,8 @@ The complete process from generating Pytorch models to using TensorRT inference.
 
 旨在从一个新手的角度展现如何从0构建整个流程
 
-## Quick Start
-### Environment setup
+## 快速开始/Quick Start
+### 环境配置/Environment setup
 
 基础环境基于nvidia TensorRT docker容器: nvcr.io/nvidia/tensorrt:22.10-py3 构建, 配置如下:
 -  Ubuntu 20.04
@@ -17,21 +17,22 @@ The complete process from generating Pytorch models to using TensorRT inference.
 -  TensorRT 8.5 EA.
 -  g++ 9.4.0
 -  cmake 3.24.0
+-  
 额外配置如下:
 - PyTorch 2.0.1
 - OpenCV 4.5.5
 请根据torch和opencv官网自行安装.
-### Example of quick start commands
-#### clone the code
+### 运行示例/Example of quick start commands
+#### 克隆代码/clone the code
 ```bash
 git clone https://github.com/yourusername/Classifier_TensorRT.git
 cd Classifier_TensorRT
 ```
-#### 导出onnx
+#### 导出onnx/Export_onnx
 ```bash
 python scripts/export_onnx.py 
 ```
-#### Compile with cmake
+#### 使用CMAKE编译/Compile with cmake
 ```bash
 cd build
 cmake ..
@@ -39,7 +40,7 @@ make -j16
 cd ..
 ```
 
-#### Run the executable
+#### 运行可执行程序/Run the executable
 ```bash
 ./main
 ```
