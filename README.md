@@ -17,10 +17,11 @@ The complete process from generating Pytorch models to using TensorRT inference.
 -  TensorRT 8.5 EA.
 -  g++ 9.4.0
 -  cmake 3.24.0
--  
+  
 额外配置如下:
 - PyTorch 2.0.1
 - OpenCV 4.5.5
+
 请根据torch和opencv官网自行安装.
 ### 运行示例/Example of quick start commands
 #### 克隆代码/clone the code
