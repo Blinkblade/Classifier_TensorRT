@@ -5,7 +5,7 @@ The complete process from generating Pytorch models to using TensorRT inference.
 
 一个使用TensoRT实现图像分类的全流程, 过程为:pytorch pth ===> onnx ===> engine
 
-旨在从一个新手的角度展现如何从0构建整个流程
+旨在从一个从整体到细节展现如何从0构建整个流程
 
 ## 快速开始/Quick Start
 ### 环境配置/Environment setup
