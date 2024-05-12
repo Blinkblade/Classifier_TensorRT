@@ -26,7 +26,7 @@ The complete process from generating Pytorch models to using TensorRT inference.
 ### 运行示例/Example of quick start commands
 #### 克隆代码/clone the code
 ```bash
-git clone https://github.com/yourusername/Classifier_TensorRT.git
+git clone https://github.com/Blinkblade/Classifier_TensorRT.git
 cd Classifier_TensorRT
 ```
 #### 导出onnx/Export_onnx
