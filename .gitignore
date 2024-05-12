@@ -1,0 +1,11 @@
+# 忽略 build 目录
+build/
+
+# 忽略所有 .pth 文件
+*.pth
+
+# 忽略所有 .engine 文件
+*.engine
+
+# 忽略所有 .onnx 文件
+*.onnx
