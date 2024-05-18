@@ -8,13 +8,19 @@ enable_language(CUDA)#激活CUDA语言支持
 # set(CUDA_INCLUDE_DIRS "/usr/local/cuda-11.8")
 # set(OPENCV_INSTALL_DIR "/usr/local/include/opencv4")
 # 由于cuda和opencv都可以使用findpackage,无需特意指定路径
-# 容器路径
-set(TENSORRT_INSTALL_DIR "/opt/tensorrt")
 
+# ==================================你的TensorRT是以本地形式安装时,需要显示指定TensorRT的安装路径=========================================
 # # 本地路径
 # set(TENSORRT_INSTALL_DIR "/home/${usrname}/packages/TensorRT-8.5.3.1")
 # # 第三方安装的trt需要手动链接lib,因为安装目录一般不在标准路径下,编译器找不到对应库
 # link_directories(${TENSORRT_INSTALL_DIR}/lib)
+
+# ====================你的TensorR是默认安装,已在系统环境中,则无须指定安装路径,只需要设置好target_link_libraries==========================
+# 容器路径/通过.deb安装到默认路径时,通常无须显式指定安装路径,
+# 如果出现报错找不到nvinfer等tensorrt相关库,可以加上
+# set(TENSORRT_INSTALL_DIR "/opt/tensorrt")
+
+
 
 
 
@@ -66,7 +72,7 @@ include_directories(${CUDA_INCLUDE_DIRS})
 # include_directories(${OPENCV_INSTALL_DIR})
 include_directories(${OpenCV_INCLUDE_DIRS})
 # TENSORRT头文件
-include_directories(${TENSORRT_INSTALL_DIR}/include)
+# include_directories(${TENSORRT_INSTALL_DIR}/include)
 
 
 

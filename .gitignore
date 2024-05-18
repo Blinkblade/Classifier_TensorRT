@@ -1,5 +1,5 @@
 # 忽略 build 目录
-build/
+build/*
 
 # 忽略所有 .pth 文件
 *.pth

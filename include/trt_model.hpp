@@ -185,17 +185,23 @@ class Model{
         // 线程序号
         cudaStream_t m_stream;
 
-        // 对于类型为 其他类 的成员变量, 最好使用指针创建, 可以有效防止多重嵌套
+        // 对于类型为 其他类 的成员变量, 最好使用指针创建, 可以有效防止多重嵌套, 
+        // 智能指针可以自动管理对象的生命周期, 只会在引用为0时销毁，可以有效地潜在的销毁顺序问题
         // 这里有些变量本身就是一个指针, 使用shared智能指针可以维持一个不唯一引用的成员指针
 
+        // 为了更好地避免前在的销毁顺序问题,声明顺序最好格外注意
+        // 如果某个变量依赖于另一个变量进行初始化或引用了另一个变量, 需要在其依赖的那个变量之后声明
+        // 因为c++销毁对象时是按照声明的反序销毁, 因此最好保证先销毁不被引用的变量，先声明需要被其他变量使用的变量
         // logger用于创建Builder等trt成员
         std::shared_ptr<logger::Logger>                 m_logger;
         // timer用于计时评估
         std::shared_ptr<timer::Timer>                   m_timer;
-        // engine用于序列化模型与推理
-        std::shared_ptr<nvinfer1::ICudaEngine>          m_engine;
+        // engine需要依赖于runtime创建, 因此最好先声明runtime再声明engine
         // runtime用于反序列化
         std::shared_ptr<nvinfer1::IRuntime>             m_runtime;
+        // engine用于序列化模型与推理
+        std::shared_ptr<nvinfer1::ICudaEngine>          m_engine;
+        // context依赖engine,因此先声明engine后声明context
         // 推理上下文,保存了推理时的各种信息
         std::shared_ptr<nvinfer1::IExecutionContext>    m_context;
         // network,用于静态存储从onnx读取的网络结构
