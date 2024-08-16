@@ -95,7 +95,7 @@ Feel free to contact me!
 
 - [x] 在Jetson Orin Nano上进行部署(经过测试,本项目无需特别修改可以直接在Jetson开发板上成功编译并运行。)
 - [ ] 使用摄像头进行实时推理
-- [ ] 2D object detection
+- [x] 2D object detection
 - [ ] 3d object detection
 - [ ] multimodal 3d object detection
       
