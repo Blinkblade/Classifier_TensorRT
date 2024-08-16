@@ -27,6 +27,22 @@ Model::Model(std::string onnxPath, logger::Level level, Params params)
 
 }
 
+// 返回计算精度
+std::string Model::getPrec(precision prec)
+{
+    switch (prec)
+    {
+    case model::precision::FP16: 
+        return "float16";
+    
+    case model::precision::INT8:
+        return "int8";
+
+    default:
+        return "float32";
+    }
+}
+
 void Model::load_image(std::string image_path)
 {
     // 如果路径存在
@@ -43,9 +59,11 @@ void Model::load_image(std::string image_path)
 }
 
 // 初始化模型,生成推理引擎,包括Build和load两种模式
-// 如果上下文已经加载好就不需要再读取直接用上下文即可,因此此时什么也不做
+// 如果上下文已经加载好就不需要再读取直接用上下文即可,
+// 不过需要注意的是, 连续推理时需要清除保存的结果
 void Model::init_model()
 {
+    // 内存中没有上下文说明还没创建,从头开始创建
     if(this->m_context == nullptr){
 
         if(fileExists(this->m_enginePath)){
@@ -62,6 +80,9 @@ void Model::init_model()
             // 追踪状态成功了就说一声
             LOG("Build engine  %s success!",this->m_enginePath.c_str());
         }
+    }
+    else{
+        this->reset_task();
     }
 
 

@@ -30,6 +30,8 @@ public:
     virtual bool postprocess_cpu() override;
     virtual bool postprocess_gpu() override;
 
+    virtual void reset_task() override;
+
 
 // 自有成员变量:
 private:

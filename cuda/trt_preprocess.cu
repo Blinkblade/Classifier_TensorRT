@@ -7,6 +7,34 @@
 namespace preprocess{
 
 
+
+// 声明
+TransInfo    trans;
+AffineMatrix affine_matrix;
+
+// 初始化仿射变换矩阵
+void warpaffine_init(int srcH, int srcW, int tarH, int tarW){
+    // extern  TransInfo    trans;
+    trans.src_h = srcH;
+    trans.src_w = srcW;
+    trans.tar_h = tarH;
+    trans.tar_w = tarW;
+    // 再trt_preprocess hpp 中 声明了, 在这个函数中初始化
+    preprocess::affine_matrix.init(trans);
+}
+
+__host__ __device__ void affine_transformation(
+    float trans_matrix[6], int src_x, int src_y, 
+    float* tar_x, float* tar_y)
+{
+    // 为输入的点计算新位置
+    *tar_x = trans_matrix[0] * src_x + trans_matrix[1] * src_y + trans_matrix[2];
+    *tar_y = trans_matrix[3] * src_x + trans_matrix[4] * src_y + trans_matrix[5];
+    
+}
+
+
+
 // 最邻近插值值直接resize, 变换通道/形状/norm可以一起进行
 __global__ void nearest_BGR2RGB_nhwc2nchw_norm_kernel(
     float* tar, uint8_t* src,
@@ -216,6 +244,82 @@ __global__ void bilinear_BGR2RGB_nhwc2nchw_shift_norm_kernel(
 }
 
 
+// 仿射变换+RGB2BGR+nhwc2nchw+Normalization
+__global__ void affine_BGR2RGB_nhwc2nchw_norm_kernel(
+    float* tar, uint8_t* src, 
+    AffineMatrix affine_matrix,
+    // srcH,srcW,tarH,tarW被存储再trans中
+    TransInfo trans,
+    float* d_mean, float* d_std
+    )
+{
+    // 根据线程取得定位到当前xy
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    // 先确定当前xy对应原图的位置
+    float src_x, src_y;
+    // 从 tar 映射回 src, 属于反变换
+    affine_transformation(affine_matrix.reverse, x+0.5, y+0.5, &src_x, &src_y);
+
+    // 为tar[x][y]取得对应的值,包括rgb2bgr, 维度变换, norm
+    // 取定双线性插值的两个角点
+    int src_x1 = floor(src_x - 0.5);
+    int src_y1 = floor(src_y - 0.5);
+    int src_x2 = src_x1 + 1;
+    int src_y2 = src_y1 + 1;
+
+    // 对应源去值错误,则没有值
+    if (src_y1 < 0 || src_x1 < 0 || src_y1 > trans.src_h || src_x1 > trans.src_w) {
+    } 
+    else{
+        // src point对应左上角点的长宽
+        float tw   = src_x - src_x1;
+        float th   = src_y - src_y1;
+
+        // 计算四个部分的面积
+        float a1_1 = (1-tw) * (1-th); //右下
+        float a1_2 = tw * (1-th); // 左下
+        float a2_1 = (1-tw) * th; //右上
+        float a2_2 = tw * th; //左上
+
+        // 索引到源的角点index, *3是因为每个位置有三个像素, *3可以索引到第一个像素(hwc格式存储)   
+        int srcIdx1_1 = (src_y1 * trans.src_w + src_x1) * 3; //左上
+        int srcIdx1_2 = (src_y1 * trans.src_w + src_x2) * 3; //右上
+        int srcIdx2_1 = (src_y2 * trans.src_w + src_x1) * 3; //左下
+        int srcIdx2_2 = (src_y2 * trans.src_w + src_x2) * 3; //右下
+
+        // 计算x y对应tar的idx(hw位置),
+        int tarIdx = y * trans.tar_w + x;
+        int tarArea = trans.tar_w * trans.tar_h;
+
+        // tar中按照nchw格式存储,先索引c再索引hw, 并且通道排列是rgb
+        // bgr2rgb, 通道idx应该是 0 1 2 = 2 1 0
+        // 通道0,r
+        tar[0*tarArea + tarIdx] = 
+            (round((a1_1 * src[srcIdx1_1 + 2] + 
+                    a1_2 * src[srcIdx1_2 + 2] +
+                    a2_1 * src[srcIdx2_1 + 2] +
+                    a2_2 * src[srcIdx2_2 + 2])) / 255.0f - d_mean[2]) / d_std[2];
+
+
+        // 通道1,g
+        tar[1*tarArea + tarIdx] = 
+            (round((a1_1 * src[srcIdx1_1 + 1] + 
+                    a1_2 * src[srcIdx1_2 + 1] +
+                    a2_1 * src[srcIdx2_1 + 1] +
+                    a2_2 * src[srcIdx2_2 + 1])) / 255.0f - d_mean[1]) / d_std[1];
+        // 通道2,b
+        tar[2*tarArea + tarIdx] = 
+            (round((a1_1 * src[srcIdx1_1 + 0] + 
+                    a1_2 * src[srcIdx1_2 + 0] +
+                    a2_1 * src[srcIdx2_1 + 0] +
+                    a2_2 * src[srcIdx2_2 + 0])) / 255.0f - d_mean[0]) / d_std[0];
+
+    }
+
+}
+
+
 
 // 这里主要进行一下核函数的配置,分配block grid等等
 void resize_bilinear_gpu(float *d_tar, uint8_t *d_src, int tarW, int tarH, int srcW, int srcH, float *d_mean, float *d_std, tactics tac)
@@ -259,6 +363,15 @@ void resize_bilinear_gpu(float *d_tar, uint8_t *d_src, int tarW, int tarH, int s
                 <<<dimGrid, dimBlock>>> 
                 (d_tar, d_src, tarW, tarH, srcW, srcH, scale, scale, d_mean, d_std);
         break;
+    
+    case preprocess::tactics::GPU_WARP_AFFINE:
+    // 初始化仿射矩阵然后输入到核函数
+        warpaffine_init(srcH, srcW, tarH, tarW);
+        affine_BGR2RGB_nhwc2nchw_norm_kernel
+                <<<dimGrid, dimBlock>>> 
+                (d_tar, d_src, affine_matrix, trans, d_mean, d_std);
+        break;
+
     default:
         LOGE("ERROR: Wrong GPU resize tactics selected. Program terminated");
         exit(1);

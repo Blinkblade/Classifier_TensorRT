@@ -159,5 +159,10 @@ std::shared_ptr<Classifier> make_classifier(std::string onnx_path, logger::Level
     classifier->init_model();
     return classifier;
 }
+
+void Classifier::reset_task(){
+
+};
+
 }
 }

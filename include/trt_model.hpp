@@ -32,7 +32,7 @@ enum device {
 enum precision {
     FP32,
     FP16,
-    // INT8， TODO
+    INT8, //TODO
 };
 
 // 每个model都要有自己的mParams
@@ -105,18 +105,21 @@ struct Params
 
 //  由于model是纯虚函数(存在virtual = 0,因此不能直接创建对象,需要继承)
 class Model{
+    // Public部分,直接定义出所有模型都一致的相关操作
     public: 
     // 构造析构,析构不实现有需要的再自行实现
     // // 构造时初始化onnxpath logger timer param workspace enginepath
         Model(std::string  onnxPath, logger::Level level, Params params);
         virtual ~Model(){};
+
+    // 具体的功能函数
+    public:
+        // 返回当前的计算精度包括FP32 FP16和Int8
+        std::string getPrec(precision prec);
         // 加载图像
         void load_image(std::string image_path);
         // 初始化模型,包括从onnx build和从engine load
         void init_model();
-    
-    // 具体的功能函数
-    public:
         // 从onnx构建模型
         bool build_engine();
         // 从已有engine load模型
@@ -124,7 +127,7 @@ class Model{
         bool load_engine();
         // 使用engine推理,包括前处理和后处理和enqueue_bindings
         void inference();
-        // dnn 推理部分,不包括前处理和后处理
+        // dnn 推理部分,不包括前处理和后处理, 因此推理流程相同
         bool enqueue_bindings();
         // 保存序列化的engine
         void save_plan(nvinfer1::IHostMemory& plan);
@@ -136,6 +139,8 @@ class Model{
         // setup负责分配host/device的memory, bindings, 以及创建推理所需要的上下文。
         // 由于不同task的input/output的tensor不一样，所以这里的setup需要在子类实现
         virtual void  setup(void const* data, std::size_t size=0);
+
+        virtual void reset_task() = 0;
 
         // 不同的task的前处理/后处理是不一样的，所以具体的实现放在子类
         // virtual = 0表示纯虚函数, 基类无定义, 子类必须自己实现
@@ -157,6 +162,8 @@ class Model{
         std::string m_enginePath;
         // 图像路径
         std::string m_imagePath;
+        // 结果输出路径
+        std::string m_outputPath;
 
 
         // 用于trt引擎的配置
@@ -170,6 +177,8 @@ class Model{
         float* m_inputMemory[2];
         float* m_outputMemory[2];
 
+        // 存储输入的图像
+        cv::Mat m_inputImage;
         // 结构体最好用引用方式,防止循环嵌套
         // 此外,指针类型还代表该成员并不被对象所完全拥有,对象只是使用,二者生命周期并不绝对关联
         Params* mParams;

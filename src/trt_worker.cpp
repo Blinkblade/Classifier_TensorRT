@@ -14,6 +14,11 @@ worker::Worker::Worker(std::string onnxPath, logger::Level level, model::Params 
         // 分类任务就构建分类器
         this->m_classifier = model::classifier::make_classifier(onnxPath, level, params);
     }
+
+    if(params.task == model::task_type::DETECTION){
+        // 构建检测器
+        this->m_detector = model::detector::make_detector(onnxPath, level, params);
+    }
 }
 
 // 实现一键推理,将i所需参数传入对应模型即可
@@ -24,6 +29,13 @@ void Worker::inference(std::string imagePath)
         this->m_classifier->load_image(imagePath);
         this->m_classifier->inference();
     }
+
+    if (this->m_detector != nullptr) {
+        this->m_detector->init_model();
+        this->m_detector->load_image(imagePath);
+        this->m_detector->inference();
+    }
+    
 }
 
 // 提供外部调用接口 

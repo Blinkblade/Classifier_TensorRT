@@ -5,6 +5,7 @@
 #include "trt_logger.hpp"
 #include "trt_model.hpp"
 #include "trt_classifier.hpp"
+#include "trt_detector.hpp"
 
 // 创建一个worker用于调用所有的模型执行任务,
 // 虽然现在只有一个分类器
@@ -29,6 +30,8 @@ protected:
     std::shared_ptr<model::Params>           m_params;
     // 因为今后考虑扩充为multi-task，所以各个task都是worker的成员变量
     std::shared_ptr<model::classifier::Classifier>  m_classifier;
+
+    std::shared_ptr<model::detector::Detector> m_detector;
 
 };
 

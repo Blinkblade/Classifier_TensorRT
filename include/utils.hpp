@@ -42,6 +42,8 @@ std::string printTensorShape(nvinfer1::ITensor* tensor);
 std::string getPrecision(nvinfer1::DataType type);
 // 加载engine文件
 std::vector<unsigned char> loadFile(const std::string &path);
+// 从input image生成output path
+std::string changePath(std::string srcPath, std::string relativePath, std::string postfix, std::string tag);
 
 
 

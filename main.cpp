@@ -148,11 +148,8 @@ void process_images_in_directory(const fs::path& directory_path, std::shared_ptr
 }
 
 
+void classify_test(){
 
-
-// 外部传参
-int main(int argc, char const *argv[])
-{
     // 设置全局日志等级,只有小于等于该日志等级的才会输出
     // debug是最高等级也就是最详细的日志
     logger::Level level = logger::Level::DEBUG;
@@ -180,6 +177,52 @@ int main(int argc, char const *argv[])
     fs::path directory = "data";
     cout << "============================== 文件夹推理 ==============================" << endl;
     process_images_in_directory(directory, worker);
+
+    cout << "分类 执行完毕!" <<endl;
+
+}
+
+
+void detect_test(){
+
+
+    cout << "============================== 检测模型推理开始 ==============================" << endl;
+
+    /*这么实现目的在于让调用的整个过程精简化*/
+    std::string onnxPath    = "models/onnx/yolov8n.onnx";
+
+    auto level         = logger::Level::DEBUG;
+    auto params        = model::Params();
+
+    params.img_info         = {640, 640, 3};
+    params.task        = model::task_type::DETECTION;
+    params.dev         = model::device::GPU;
+    params.prec        = model::precision::FP32;
+
+    // 创建一个worker的实例, 在创建的时候就完成初始化
+    auto worker   = worker::create_worker(onnxPath, level, params);
+
+    // 根据worker中的task类型进行推理
+    worker->inference("data/source/car.jpg");
+    worker->inference("data/source/airport.jpg");
+    worker->inference("data/source/crossroad.jpg");
+    worker->inference("data/source/bedroom.jpg");
+    worker->inference("data/source/cat.png");
+    worker->inference("data/source/eagle.png");
+    worker->inference("data/source/gazelle.png");
+    worker->inference("data/source/fox.png");
+    cout << "检测 执行完毕!" <<endl;
+
+}
+
+
+
+
+// 外部传参
+int main(int argc, char const *argv[])
+{
+    classify_test();
+    detect_test();
 
     cout << "main 执行完毕!" <<endl;
 

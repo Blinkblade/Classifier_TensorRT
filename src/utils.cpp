@@ -170,3 +170,27 @@ std::string getEnginePath(std::string onnxPath)
 
     return enginePath;
 };
+
+
+
+// 用于从input image path生成output path
+std::string changePath(std::string srcPath, std::string relativePath, std::string postfix, std::string tag){
+    int name_l = srcPath.rfind("/");
+    int name_r = srcPath.rfind(".");
+
+    int dir_l  = 0;
+    int dir_r  = srcPath.rfind("/");
+
+    std::string newPath;
+
+    newPath = srcPath.substr(dir_l, dir_r + 1);
+    newPath += relativePath;
+    newPath += srcPath.substr(name_l, name_r - name_l);
+
+    if (!tag.empty())
+        newPath += "-" + tag + postfix;
+    else
+        newPath += postfix;
+    
+    return newPath;
+};
