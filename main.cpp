@@ -207,10 +207,6 @@ void detect_test(){
     worker->inference("data/source/airport.jpg");
     worker->inference("data/source/crossroad.jpg");
     worker->inference("data/source/bedroom.jpg");
-    worker->inference("data/source/cat.png");
-    worker->inference("data/source/eagle.png");
-    worker->inference("data/source/gazelle.png");
-    worker->inference("data/source/fox.png");
     cout << "检测 执行完毕!" <<endl;
 
 }
