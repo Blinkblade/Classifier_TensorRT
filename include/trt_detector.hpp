@@ -23,7 +23,7 @@ struct bbox{
     // 分类ID
     int label;
     // 判断是否被nms过滤
-    bool  flg_remove;
+    bool  flg_remove = false;
 
 
     //初始化
