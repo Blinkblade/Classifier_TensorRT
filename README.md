@@ -53,6 +53,31 @@ mkdir -p models/engine
 ```bash
 python scripts/export_onnx.py 
 ```
+这会创建一个torchvision 版本的 resnet34 onnx.
+
+##### 导出yolov8 onnx用于2D目标检测/Export onnx for 2D object detection based on yolov8
+可以使用yolov8 onnx测试2D目标检测任务:
+
+首先需要按照yolov8官方项目安装yolov8: https://github.com/ultralytics/ultralytics
+
+然后, 为了保证cpp解码时访存方便,需要首先找到yolov8 head的输出位置,将输出的形状从 B C N转换为B N C
+
+例如：
+
+这个路径下: ultralytics/ultralytics/nn/modules/head.py
+
+line 61 行 加入: 
+```python
+y = y.transpose(1,2)
+```
+然后运行export_yolov8.py脚本导出
+```bash
+python scripts/export_yolov8.py 
+```
+再将yolov8.onnx移动到models/onnx目录下
+```bash
+mv yolov8n.onnx ./models/onnx/
+```
 #### 使用CMAKE编译/Compile with cmake
 首先需要将CMakeLists.txt中的tensorrt路径TENSORRT_INSTALL_DIR改为你的安装路径,不同的安装模式有不同写法,这点在CMakeLists.txt已经注明
 ```bash

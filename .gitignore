@@ -3,9 +3,13 @@ build/*
 
 # 忽略所有 .pth 文件
 *.pth
+*.pt
 
 # 忽略所有 .engine 文件
 *.engine
 
 # 忽略所有 .onnx 文件
 *.onnx
+
+# 忽略可执行文件
+./main
